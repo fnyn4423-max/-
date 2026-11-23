@@ -1,0 +1,225 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap');
+
+:root {
+    color-scheme: dark;
+    font-family: "DM Sans", "Noto Sans JP", sans-serif;
+    background: #10172b;
+    color: #f6f7fb;
+    font-synthesis: none;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    min-width: 320px;
+    min-height: 100vh;
+    margin: 0;
+    background:
+        radial-gradient(ellipse at 50% 0%, rgba(52, 75, 135, .23), transparent 55%),
+        #10172b;
+}
+
+button { font: inherit; }
+
+.game-shell {
+    width: min(1120px, calc(100% - 48px));
+    margin: 0 auto;
+    padding: 28px 0 42px;
+}
+
+.topbar, .brand, .game-heading, .game-footer, .controls-hint, .key-group {
+    display: flex;
+    align-items: center;
+}
+
+.topbar, .game-heading, .game-footer { justify-content: space-between; }
+
+.topbar { margin-bottom: 30px; }
+
+.brand {
+    gap: 10px;
+    color: #f6f7fb;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: .16em;
+    text-decoration: none;
+}
+
+.brand-mark { color: #ffc968; font-size: 24px; }
+.top-note, .mobile-hint { color: #8d98b6; font-size: 13px; }
+
+.game-card {
+    overflow: hidden;
+    padding: 30px;
+    border: 1px solid rgba(176, 191, 234, .13);
+    border-radius: 22px;
+    background: #1a233b;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, .22);
+}
+
+.game-heading { margin-bottom: 22px; }
+.eyebrow { margin: 0 0 8px; color: #93a4d5; font-size: 10px; font-weight: 800; letter-spacing: .19em; }
+h1 { margin: 0; font-size: clamp(20px, 3vw, 27px); letter-spacing: .015em; }
+
+.restart-button {
+    padding: 10px 14px;
+    border: 1px solid #3c4968;
+    border-radius: 10px;
+    background: #242f4b;
+    color: #e4e9f8;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 700;
+    transition: background .2s, border-color .2s;
+}
+
+.restart-button:hover { border-color: #7084bd; background: #2b3858; }
+.restart-button span { margin-right: 5px; font-size: 16px; }
+
+.game-frame {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(207, 220, 255, .16);
+    border-radius: 14px;
+    background: #90b8eb;
+    isolation: isolate;
+}
+
+canvas { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; }
+
+.hud {
+    position: absolute;
+    z-index: 1;
+    top: 16px;
+    right: 16px;
+    left: 16px;
+    display: flex;
+    justify-content: space-between;
+    pointer-events: none;
+}
+
+.hud-pill {
+    display: inline-flex;
+    min-height: 36px;
+    align-items: center;
+    gap: 7px;
+    padding: 0 13px;
+    border: 1px solid rgba(255, 255, 255, .22);
+    border-radius: 10px;
+    background: rgba(18, 30, 60, .76);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 800;
+    backdrop-filter: blur(8px);
+}
+
+.hud-icon { color: #ffd26b; font-size: 16px; }
+.hud-label { color: #aeb9d5; font-size: 11px; font-weight: 600; }
+.hearts { color: #ff8296; letter-spacing: 3px; }
+
+.game-footer { padding-top: 16px; color: #aeb8d2; font-size: 12px; }
+.controls-hint { gap: 8px; }
+.controls-hint > span:last-child { color: #d7dced; }
+.hint-divider { color: #667391; }
+kbd {
+    display: inline-grid;
+    min-width: 24px;
+    height: 24px;
+    place-items: center;
+    padding: 0 6px;
+    border: 1px solid #455272;
+    border-bottom-width: 2px;
+    border-radius: 6px;
+    background: #26314d;
+    color: #edf1ff;
+    font: 600 10px "DM Sans", sans-serif;
+}
+.key-group { gap: 3px; }
+.game-footer p { margin: 0; }
+.game-footer p span { padding-left: 5px; color: #ffc968; }
+.mobile-hint, .touch-controls { display: none; }
+
+.game-message {
+    position: absolute;
+    z-index: 2;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: rgba(13, 23, 48, .48);
+    backdrop-filter: blur(5px);
+}
+
+.game-message[hidden] { display: none; }
+
+.message-card {
+    width: min(360px, calc(100% - 36px));
+    padding: 30px;
+    border: 1px solid rgba(211, 221, 255, .2);
+    border-radius: 18px;
+    background: #202c49;
+    box-shadow: 0 18px 70px rgba(8, 15, 33, .3);
+    text-align: center;
+    animation: pop-in .28s ease-out both;
+}
+
+.message-sparkle { display: block; margin-bottom: 10px; color: #ffd16b; font-size: 30px; }
+.message-card .eyebrow { margin-bottom: 7px; }
+.message-card h2 { margin: 0 0 8px; font-size: 25px; }
+.message-card > p:not(.eyebrow) { margin: 0 0 21px; color: #bac5df; font-size: 13px; }
+.play-button {
+    padding: 12px 18px;
+    border: 0;
+    border-radius: 9px;
+    background: #ffd16b;
+    color: #222b3c;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 800;
+}
+.play-button:hover { background: #ffdd8e; }
+.play-button span { margin-left: 8px; }
+
+@keyframes pop-in {
+    from { opacity: 0; transform: translateY(8px) scale(.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 700px) {
+    .game-shell { width: min(100% - 24px, 600px); padding-top: 17px; }
+    .topbar { margin-bottom: 18px; }
+    .top-note { font-size: 11px; }
+    .game-card { padding: 17px 12px 14px; border-radius: 16px; }
+    .game-heading { gap: 10px; margin: 0 2px 14px; }
+    .eyebrow { font-size: 8px; }
+    .restart-button { padding: 8px 9px; white-space: nowrap; font-size: 10px; }
+    .restart-button span { font-size: 13px; }
+    .game-frame { border-radius: 10px; }
+    .hud { top: 8px; right: 8px; left: 8px; }
+    .hud-pill { min-height: 28px; gap: 4px; padding: 0 8px; border-radius: 8px; font-size: 11px; }
+    .hud-icon { font-size: 13px; }
+    .hearts { letter-spacing: 1px; }
+    .game-footer { align-items: flex-start; gap: 8px; font-size: 9px; }
+    .controls-hint { gap: 5px; white-space: nowrap; }
+    .game-footer p { text-align: right; }
+    kbd { min-width: 19px; height: 20px; padding: 0 4px; font-size: 9px; }
+    .mobile-hint { display: block; margin: 12px 3px 7px; text-align: center; font-size: 11px; }
+    .touch-controls { display: flex; justify-content: center; gap: 14px; }
+    .touch-button {
+        width: 58px;
+        height: 48px;
+        border: 1px solid #3c4968;
+        border-radius: 13px;
+        background: #202b46;
+        color: #f5f7ff;
+        font-size: 20px;
+        font-weight: 800;
+        touch-action: none;
+        user-select: none;
+    }
+    .touch-button:active, .touch-button.is-pressed { background: #364568; }
+    .jump-button { width: 84px; background: #2a3553; font-size: 12px; letter-spacing: .08em; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; scroll-behavior: auto !important; }
+}
