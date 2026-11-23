@@ -138,6 +138,7 @@
 
     function beginBattle(enemy) {
         activeBattle = enemy;
+        player.facing = enemy.x + enemy.w / 2 > player.x + player.w / 2 ? 1 : -1;
         battleQuestion = battleQuestions[Math.floor(Math.random() * battleQuestions.length)];
         const choices = [...battleQuestion.choices];
         for (let i = choices.length - 1; i > 0; i -= 1) {
@@ -167,10 +168,11 @@
             activeBattle.defeated = true;
             activeBattle.defeatTime = 0;
             battleEffect = {
-                x: activeBattle.x + activeBattle.w / 2,
-                y: 435 + activeBattle.h / 2,
+                x: 700,
+                y: 330,
                 elapsed: 0,
                 text: "撃破！",
+                screen: true,
             };
             battleFeedback.textContent = "正解！敵をたおした！";
             gameState = "attack";
@@ -200,8 +202,12 @@
     }
 
     function update(dt) {
-        if (gameState === "battle") return;
+        if (gameState === "battle") {
+            elapsed += dt;
+            return;
+        }
         if (gameState === "attack" || gameState === "miss") {
+            elapsed += dt;
             battleTimer += dt;
             if (battleEffect) {
                 battleEffect.elapsed += dt;
@@ -298,6 +304,101 @@
         drawCloud(920 - cameraX * .12, 108, .9);
         drawHills("#a6c8e8", 0.18, 345, 95, 220);
         drawHills("#8bb2d8", 0.32, 405, 75, 180);
+    }
+
+    function drawBattleScene() {
+        const sky = ctx.createLinearGradient(0, 0, 0, HEIGHT);
+        sky.addColorStop(0, "#172443");
+        sky.addColorStop(.52, "#637b9b");
+        sky.addColorStop(1, "#d5b68f");
+        ctx.fillStyle = sky;
+        ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+        const light = ctx.createRadialGradient(480, 200, 30, 480, 200, 470);
+        light.addColorStop(0, "rgba(255, 239, 193, .55)");
+        light.addColorStop(1, "rgba(255, 239, 193, 0)");
+        ctx.fillStyle = light;
+        ctx.fillRect(0, 0, WIDTH, 400);
+
+        ctx.fillStyle = "rgba(32, 49, 77, .35)";
+        ctx.beginPath();
+        ctx.moveTo(0, 315);
+        ctx.lineTo(115, 245);
+        ctx.lineTo(245, 315);
+        ctx.lineTo(380, 225);
+        ctx.lineTo(535, 320);
+        ctx.lineTo(700, 238);
+        ctx.lineTo(855, 310);
+        ctx.lineTo(960, 255);
+        ctx.lineTo(960, 390);
+        ctx.lineTo(0, 390);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = "#34445a";
+        ctx.beginPath();
+        ctx.moveTo(0, 350);
+        ctx.quadraticCurveTo(240, 318, 470, 355);
+        ctx.quadraticCurveTo(735, 392, 960, 345);
+        ctx.lineTo(960, HEIGHT);
+        ctx.lineTo(0, HEIGHT);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = "rgba(255, 231, 183, .6)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(0, 350);
+        ctx.quadraticCurveTo(240, 318, 470, 355);
+        ctx.quadraticCurveTo(735, 392, 960, 345);
+        ctx.stroke();
+
+        const compact = canvas.clientHeight < 280;
+        if (compact) {
+            ctx.fillStyle = "rgba(20, 32, 54, .3)";
+            ctx.beginPath();
+            ctx.ellipse(270, 148, 105, 18, -.08, 0, Math.PI * 2);
+            ctx.ellipse(725, 148, 86, 15, .06, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        ctx.fillStyle = "rgba(20, 32, 54, .3)";
+        ctx.beginPath();
+        ctx.ellipse(270, compact ? 148 : 398, 88, 16, -.08, 0, Math.PI * 2);
+        ctx.ellipse(725, compact ? 148 : 398, 74, 14, .06, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "rgba(255, 231, 183, .28)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.ellipse(270, compact ? 148 : 398, 100, 19, -.08, 0, Math.PI * 2);
+        ctx.ellipse(725, compact ? 148 : 398, 86, 17, .06, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.font = "700 15px sans-serif";
+        ctx.fillStyle = "#fff4d8";
+        if (!compact) {
+            ctx.fillText("ぼうけんしゃ", 270, 135);
+            ctx.fillText("スライム", 725, 170);
+        }
+
+        const playerScale = 2.7;
+        ctx.save();
+        const playerTop = compact ? 0 : 155;
+        ctx.translate(205 - (player.x - cameraX) * playerScale, playerTop - player.y * playerScale);
+        ctx.scale(playerScale, playerScale);
+        drawPlayer(true);
+        ctx.restore();
+
+        const enemyScale = 2.7;
+        ctx.save();
+        const enemyTop = compact ? 8 : 190;
+        ctx.translate(685 - (activeBattle.x - cameraX) * enemyScale, enemyTop - 435 * enemyScale);
+        ctx.scale(enemyScale, enemyScale);
+        drawEnemy(activeBattle);
+        ctx.restore();
+
+        if (gameState === "attack") drawBattleEffect();
     }
 
     function drawCloud(x, y, scale) {
@@ -411,7 +512,7 @@
         const scale = .65 + progress * .7;
         ctx.save();
         ctx.globalAlpha = alpha;
-        ctx.translate(battleEffect.x - cameraX, battleEffect.y);
+        ctx.translate(battleEffect.x - (battleEffect.screen ? 0 : cameraX), battleEffect.y);
         ctx.scale(scale, scale);
 
         ctx.fillStyle = "#fff2a6";
@@ -451,8 +552,8 @@
         ctx.restore();
     }
 
-    function drawPlayer() {
-        if (player.invulnerable > 0 && Math.floor(elapsed * 13) % 2 === 0) return;
+    function drawPlayer(ignoreInvulnerability = false) {
+        if (!ignoreInvulnerability && player.invulnerable > 0 && Math.floor(elapsed * 13) % 2 === 0) return;
         const x = player.x - cameraX;
         const y = player.y;
         ctx.fillStyle = "rgba(30, 44, 67, .18)";
@@ -617,6 +718,10 @@
     }
 
     function render() {
+        if (gameState === "battle" || gameState === "attack" || gameState === "miss") {
+            drawBattleScene();
+            return;
+        }
         const shake = battleEffect
             ? Math.sin(battleEffect.elapsed * 70) * (1 - battleEffect.elapsed / BATTLE_EFFECT_DURATION) * 4
             : 0;

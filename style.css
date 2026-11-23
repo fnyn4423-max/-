@@ -172,13 +172,29 @@ kbd {
     animation: pop-in .28s ease-out both;
 }
 
-.battle-message { z-index: 3; }
-.battle-card { width: min(400px, calc(100% - 36px)); }
+.battle-message {
+    z-index: 3;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 18px;
+    background: linear-gradient(180deg, rgba(14, 22, 42, 0) 28%, rgba(14, 22, 42, .35) 55%, rgba(14, 22, 42, .88) 100%);
+    backdrop-filter: none;
+}
+.battle-card {
+    display: grid;
+    width: min(720px, 100%);
+    grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+    align-items: center;
+    gap: 0 24px;
+    padding: 15px 24px 10px;
+}
+.battle-copy, .battle-answer { min-width: 0; }
 .battle-card .eyebrow { margin-bottom: 7px; }
 .battle-card h2 { margin: 0 0 7px; font-size: 24px; }
-.battle-instruction { margin: 0 0 16px; color: #bac5df; font-size: 13px; }
+.battle-instruction { margin: 0 0 8px; color: #bac5df; font-size: 13px; }
 .battle-prompt {
-    margin: 0 0 16px;
+    margin: 0 0 10px;
     color: #fff;
     font-size: clamp(26px, 6vw, 36px);
     font-weight: 800;
@@ -186,7 +202,7 @@ kbd {
 }
 .battle-choices { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .battle-choice {
-    min-height: 52px;
+    min-height: 46px;
     border: 1px solid #53688f;
     border-radius: 11px;
     background: #2a395b;
@@ -199,7 +215,7 @@ kbd {
 .battle-choice:hover:not(:disabled) { transform: translateY(-2px); background: #394d77; }
 .battle-choice:focus-visible { outline: 3px solid #ffd16b; outline-offset: 2px; }
 .battle-choice:disabled { cursor: default; opacity: .65; }
-.battle-feedback { min-height: 20px; margin: 15px 0 0; color: #ffd16b; font-size: 13px; font-weight: 800; }
+.battle-feedback { min-height: 18px; margin: 8px 0 0; color: #ffd16b; font-size: 13px; font-weight: 800; }
 
 .message-sparkle { display: block; margin-bottom: 10px; color: #ffd16b; font-size: 30px; }
 .message-card .eyebrow { margin-bottom: 7px; }
@@ -233,6 +249,18 @@ kbd {
     .restart-button { padding: 8px 9px; white-space: nowrap; font-size: 10px; }
     .restart-button span { font-size: 13px; }
     .game-frame { border-radius: 10px; }
+    .battle-message { padding: 8px; }
+    .battle-card {
+        grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr);
+        gap: 0 10px;
+        padding: 8px;
+    }
+    .battle-card .eyebrow, .battle-card h2, .battle-instruction { display: none; }
+    .battle-prompt { margin: 0; font-size: clamp(18px, 6vw, 24px); }
+    .battle-choices { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; }
+    .battle-choice { min-height: 38px; font-size: 16px; }
+    .battle-choice:last-child { grid-column: 1 / -1; }
+    .battle-feedback { min-height: 15px; margin-top: 4px; font-size: 10px; }
     .hud { top: 8px; right: 8px; left: 8px; }
     .hud-pill { min-height: 28px; gap: 4px; padding: 0 8px; border-radius: 8px; font-size: 11px; }
     .hud-icon { font-size: 13px; }
