@@ -17,8 +17,22 @@
     const GRAVITY = 1750;
     const MOVE_SPEED = 290;
     const JUMP_SPEED = 650;
+    const BATTLE_EFFECT_DURATION = .42;
+    const BATTLE_RESULT_DURATION = .72;
     const keys = new Set();
     const controls = { left: false, right: false };
+    const battleMessage = document.querySelector("#battle-message");
+    const battlePrompt = document.querySelector("#battle-prompt");
+    const battleFeedback = document.querySelector("#battle-feedback");
+    const battleChoices = [...document.querySelectorAll("[data-battle-choice]")];
+    const battleQuestions = [
+        { prompt: "3 + 4 = ?", answer: 7, choices: [6, 7, 8] },
+        { prompt: "9 - 5 = ?", answer: 4, choices: [3, 4, 5] },
+        { prompt: "2 × 4 = ?", answer: 8, choices: [6, 8, 10] },
+        { prompt: "6 + 7 = ?", answer: 13, choices: [12, 13, 14] },
+        { prompt: "15 - 8 = ?", answer: 7, choices: [6, 7, 9] },
+        { prompt: "3 × 5 = ?", answer: 15, choices: [12, 15, 18] },
+    ];
 
     const platforms = [
         { x: 0, y: 465, w: 570, h: 90 },
@@ -55,6 +69,10 @@
     let score = 0;
     let lives = 3;
     let elapsed = 0;
+    let battleEffect = null;
+    let activeBattle = null;
+    let battleQuestion = null;
+    let battleTimer = 0;
     let gameState = "playing";
     let lastFrame = 0;
 
@@ -66,7 +84,12 @@
         score = 0;
         lives = 3;
         elapsed = 0;
+        battleEffect = null;
+        activeBattle = null;
+        battleQuestion = null;
+        battleTimer = 0;
         gameState = "playing";
+        battleMessage.hidden = true;
         message.hidden = true;
         updateHud();
     }
@@ -80,6 +103,7 @@
 
     function finish(won) {
         gameState = won ? "won" : "lost";
+        battleMessage.hidden = true;
         message.hidden = false;
         messageIcon.textContent = won ? "¥" : "♡";
         messageEyebrow.textContent = won ? "ADVENTURE COMPLETE" : "TRY AGAIN";
@@ -106,7 +130,95 @@
         return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
     }
 
+    function clearMovementInput() {
+        for (const key of ["ArrowLeft", "ArrowRight", "ArrowUp", "Space", "a", "d", "w"]) keys.delete(key);
+        controls.left = false;
+        controls.right = false;
+    }
+
+    function beginBattle(enemy) {
+        activeBattle = enemy;
+        battleQuestion = battleQuestions[Math.floor(Math.random() * battleQuestions.length)];
+        const choices = [...battleQuestion.choices];
+        for (let i = choices.length - 1; i > 0; i -= 1) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [choices[i], choices[j]] = [choices[j], choices[i]];
+        }
+        battlePrompt.textContent = battleQuestion.prompt;
+        battleFeedback.textContent = "";
+        battleChoices.forEach((button, index) => {
+            button.textContent = String(choices[index]);
+            button.dataset.answer = String(choices[index]);
+            button.disabled = false;
+        });
+        player.vx = 0;
+        clearMovementInput();
+        battleMessage.hidden = false;
+        gameState = "battle";
+        battleChoices[0].focus();
+    }
+
+    function submitBattleAnswer(answer) {
+        if (gameState !== "battle" || !activeBattle || !battleQuestion) return;
+        battleChoices.forEach((button) => { button.disabled = true; });
+        battleTimer = 0;
+
+        if (answer === battleQuestion.answer) {
+            activeBattle.defeated = true;
+            activeBattle.defeatTime = 0;
+            battleEffect = {
+                x: activeBattle.x + activeBattle.w / 2,
+                y: 435 + activeBattle.h / 2,
+                elapsed: 0,
+                text: "撃破！",
+            };
+            battleFeedback.textContent = "正解！敵をたおした！";
+            gameState = "attack";
+            return;
+        }
+
+        const enemy = activeBattle;
+        const playerWasLeft = player.x + player.w / 2 < enemy.x + enemy.w / 2;
+        lives -= 1;
+        player.invulnerable = 1.35;
+        player.x = Math.max(0, Math.min(
+            WORLD_WIDTH - player.w,
+            playerWasLeft ? enemy.x - player.w - 8 : enemy.x + enemy.w + 8,
+        ));
+        player.y = 385;
+        player.vx = 0;
+        player.vy = 0;
+        player.grounded = false;
+        cameraX = Math.max(0, Math.min(WORLD_WIDTH - WIDTH, player.x - WIDTH * .36));
+        updateHud();
+        battleFeedback.textContent = "不正解！ライフが1つ減った";
+        if (lives <= 0) {
+            finish(false);
+            return;
+        }
+        gameState = "miss";
+    }
+
     function update(dt) {
+        if (gameState === "battle") return;
+        if (gameState === "attack" || gameState === "miss") {
+            battleTimer += dt;
+            if (battleEffect) {
+                battleEffect.elapsed += dt;
+                if (battleEffect.elapsed >= BATTLE_EFFECT_DURATION) battleEffect = null;
+            }
+            if (activeBattle?.defeated) activeBattle.defeatTime = battleTimer;
+            if (battleTimer >= BATTLE_RESULT_DURATION) {
+                if (gameState === "attack") enemies = enemies.filter((enemy) => enemy !== activeBattle);
+                activeBattle = null;
+                battleQuestion = null;
+                battleEffect = null;
+                battleMessage.hidden = true;
+                clearMovementInput();
+                gameState = "playing";
+            }
+            return;
+        }
         if (gameState !== "playing") return;
         elapsed += dt;
         player.invulnerable = Math.max(0, player.invulnerable - dt);
@@ -142,10 +254,15 @@
         if (player.y > HEIGHT + 100) damagePlayer();
 
         for (const enemy of enemies) {
+            if (enemy.defeated) continue;
             enemy.x += enemy.speed * enemy.direction * dt;
             if (enemy.x < enemy.min || enemy.x + enemy.w > enemy.max) enemy.direction *= -1;
-            if (overlaps(player, { x: enemy.x, y: 435, w: enemy.w, h: enemy.h })) damagePlayer();
+            if (overlaps(player, { x: enemy.x, y: 435, w: enemy.w, h: enemy.h })) {
+                beginBattle(enemy);
+                break;
+            }
         }
+        if (gameState !== "playing") return;
 
         for (const coin of coins) {
             if (!coin.collected && overlaps(player, { x: coin.x - 13, y: coin.y - 13, w: 26, h: 26 })) {
@@ -261,18 +378,77 @@
     }
 
     function drawEnemy(enemy) {
-        const x = enemy.x - cameraX;
+        let x = enemy.x - cameraX;
+        let y = 435;
+        ctx.save();
+        if (enemy.defeated) {
+            const progress = Math.min(1, enemy.defeatTime / BATTLE_RESULT_DURATION);
+            ctx.globalAlpha = 1 - progress;
+            ctx.translate(x + enemy.w / 2, y + enemy.h / 2 - progress * 26);
+            ctx.rotate(progress * 2);
+            ctx.scale(1 - progress * .65, 1 - progress * .65);
+            x = -enemy.w / 2;
+            y = -enemy.h / 2;
+        }
         ctx.fillStyle = "#db6f73";
-        roundedRect(x, 435, enemy.w, enemy.h, 12);
+        roundedRect(x, y, enemy.w, enemy.h, 12);
         ctx.fill();
         ctx.fillStyle = "#f5a298";
-        roundedRect(x + 4, 438, enemy.w - 8, 8, 5);
+        roundedRect(x + 4, y + 3, enemy.w - 8, 8, 5);
         ctx.fill();
         ctx.fillStyle = "#283047";
         ctx.beginPath();
-        ctx.arc(x + 11, 448, 2.5, 0, Math.PI * 2);
-        ctx.arc(x + 23, 448, 2.5, 0, Math.PI * 2);
+        ctx.arc(x + 11, y + 13, 2.5, 0, Math.PI * 2);
+        ctx.arc(x + 23, y + 13, 2.5, 0, Math.PI * 2);
         ctx.fill();
+        ctx.restore();
+    }
+
+    function drawBattleEffect() {
+        if (!battleEffect || battleEffect.elapsed >= BATTLE_EFFECT_DURATION) return;
+        const progress = battleEffect.elapsed / BATTLE_EFFECT_DURATION;
+        const alpha = 1 - progress;
+        const scale = .65 + progress * .7;
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.translate(battleEffect.x - cameraX, battleEffect.y);
+        ctx.scale(scale, scale);
+
+        ctx.fillStyle = "#fff2a6";
+        ctx.strokeStyle = "#f7b84d";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        for (let i = 0; i < 12; i += 1) {
+            const angle = -Math.PI / 2 + i * Math.PI / 6;
+            const radius = i % 2 === 0 ? 20 : 10;
+            const px = Math.cos(angle) * radius;
+            const py = Math.sin(angle) * radius;
+            if (i === 0) ctx.moveTo(px, py);
+            else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.lineCap = "round";
+        ctx.lineWidth = 5;
+        ctx.strokeStyle = "#fff";
+        ctx.beginPath();
+        ctx.moveTo(-16, -14);
+        ctx.lineTo(16, 14);
+        ctx.moveTo(16, -14);
+        ctx.lineTo(-16, 14);
+        ctx.stroke();
+
+        ctx.font = "bold 17px sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = "#344365";
+        ctx.strokeText(battleEffect.text, 0, -31 - progress * 12);
+        ctx.fillStyle = "#fff";
+        ctx.fillText(battleEffect.text, 0, -31 - progress * 12);
+        ctx.restore();
     }
 
     function drawPlayer() {
@@ -441,12 +617,19 @@
     }
 
     function render() {
+        const shake = battleEffect
+            ? Math.sin(battleEffect.elapsed * 70) * (1 - battleEffect.elapsed / BATTLE_EFFECT_DURATION) * 4
+            : 0;
+        ctx.save();
+        ctx.translate(shake, -shake * .35);
         drawBackground();
         drawPlatforms();
         for (const coin of coins) drawCoin(coin);
         for (const enemy of enemies) drawEnemy(enemy);
         drawGoal();
         drawPlayer();
+        drawBattleEffect();
+        ctx.restore();
     }
 
     function frame(timestamp) {
@@ -498,6 +681,9 @@
 
     document.querySelector("#restart-button").addEventListener("click", resetGame);
     playButton.addEventListener("click", resetGame);
+    battleChoices.forEach((button) => {
+        button.addEventListener("click", () => submitBattleAnswer(Number(button.dataset.answer)));
+    });
     resetGame();
     requestAnimationFrame(frame);
 })();

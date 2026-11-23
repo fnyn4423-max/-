@@ -149,7 +149,7 @@ kbd {
 .game-footer p span { padding-left: 5px; color: #ffc968; }
 .mobile-hint, .touch-controls { display: none; }
 
-.game-message {
+.game-message, .battle-message {
     position: absolute;
     z-index: 2;
     inset: 0;
@@ -159,9 +159,9 @@ kbd {
     backdrop-filter: blur(5px);
 }
 
-.game-message[hidden] { display: none; }
+.game-message[hidden], .battle-message[hidden] { display: none; }
 
-.message-card {
+.message-card, .battle-card {
     width: min(360px, calc(100% - 36px));
     padding: 30px;
     border: 1px solid rgba(211, 221, 255, .2);
@@ -171,6 +171,35 @@ kbd {
     text-align: center;
     animation: pop-in .28s ease-out both;
 }
+
+.battle-message { z-index: 3; }
+.battle-card { width: min(400px, calc(100% - 36px)); }
+.battle-card .eyebrow { margin-bottom: 7px; }
+.battle-card h2 { margin: 0 0 7px; font-size: 24px; }
+.battle-instruction { margin: 0 0 16px; color: #bac5df; font-size: 13px; }
+.battle-prompt {
+    margin: 0 0 16px;
+    color: #fff;
+    font-size: clamp(26px, 6vw, 36px);
+    font-weight: 800;
+    letter-spacing: .04em;
+}
+.battle-choices { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.battle-choice {
+    min-height: 52px;
+    border: 1px solid #53688f;
+    border-radius: 11px;
+    background: #2a395b;
+    color: #fff;
+    cursor: pointer;
+    font-size: 19px;
+    font-weight: 800;
+    transition: background .15s, transform .15s;
+}
+.battle-choice:hover:not(:disabled) { transform: translateY(-2px); background: #394d77; }
+.battle-choice:focus-visible { outline: 3px solid #ffd16b; outline-offset: 2px; }
+.battle-choice:disabled { cursor: default; opacity: .65; }
+.battle-feedback { min-height: 20px; margin: 15px 0 0; color: #ffd16b; font-size: 13px; font-weight: 800; }
 
 .message-sparkle { display: block; margin-bottom: 10px; color: #ffd16b; font-size: 30px; }
 .message-card .eyebrow { margin-bottom: 7px; }
