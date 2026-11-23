@@ -280,31 +280,143 @@
         ctx.ellipse(x + player.w / 2, Math.min(458, y + player.h + 3), 18, 5, 0, 0, Math.PI * 2);
         ctx.fill();
 
-        ctx.fillStyle = "#354768";
-        roundedRect(x + 4, y + 17, 26, 28, 8);
-        ctx.fill();
-        ctx.fillStyle = "#f4bc82";
-        roundedRect(x + 5, y + 2, 25, 24, 9);
-        ctx.fill();
-        ctx.fillStyle = "#4c5a85";
-        roundedRect(x + 3, y, 28, 10, 7);
-        ctx.fill();
-        ctx.fillStyle = "#fff";
-        const eyeX = player.facing > 0 ? x + 23 : x + 10;
+        const moving = player.grounded && player.vx !== 0;
+        const running = moving ? Math.sin(elapsed * 14) * 3 : 0;
+        const idle = player.grounded ? Math.sin(elapsed * 3) * .7 : 0;
+        ctx.save();
+        ctx.translate(x + (player.facing < 0 ? player.w : 0), y + idle);
+        ctx.scale(player.facing, 1);
+
+        // 流れるマフラー
+        ctx.fillStyle = "#efbd54";
         ctx.beginPath();
-        ctx.arc(eyeX, y + 15, 3, 0, Math.PI * 2);
+        ctx.moveTo(8, 21);
+        ctx.quadraticCurveTo(-2 - running * .35, 24, -8 - running * .6, 18 + running);
+        ctx.lineTo(-5 - running * .4, 14);
+        ctx.quadraticCurveTo(3, 16, 12, 17);
+        ctx.closePath();
         ctx.fill();
-        ctx.fillStyle = "#283047";
+        ctx.fillStyle = "#ffe18a";
+        ctx.fillRect(9, 19, 16, 4);
+
+        // 袖と腕
+        ctx.fillStyle = "#263a5c";
+        ctx.save();
+        ctx.translate(7, 29);
+        ctx.rotate((-running - 4) * Math.PI / 180);
+        roundedRect(-3, 0, 8, 17, 4);
+        ctx.fill();
+        ctx.restore();
+        ctx.fillStyle = "#38598a";
+        ctx.save();
+        ctx.translate(26, 29);
+        ctx.rotate((running - 2) * Math.PI / 180);
+        roundedRect(-2, 0, 8, 17, 4);
+        ctx.fill();
+        ctx.restore();
+
+        // グローブ
+        ctx.fillStyle = "#d9e5f3";
         ctx.beginPath();
-        ctx.arc(eyeX + player.facing, y + 15, 1.5, 0, Math.PI * 2);
+        ctx.arc(5, 44, 4.2, 0, Math.PI * 2);
+        ctx.arc(28, 43 + (running < 0 ? 2 : 0), 4.2, 0, Math.PI * 2);
         ctx.fill();
-        ctx.fillStyle = "#f4bc82";
-        ctx.fillRect(x + (player.facing > 0 ? 26 : 1), y + 25, 7, 9);
-        ctx.fillStyle = "#26324f";
-        roundedRect(x + 3, y + 40, 12, 7, 3);
+
+        // ジャケット
+        ctx.shadowColor = "rgba(20, 35, 58, .38)";
+        ctx.shadowBlur = 5;
+        ctx.shadowOffsetY = 3;
+        ctx.fillStyle = "#365c8d";
+        roundedRect(4, 17, 27, 25, 8);
         ctx.fill();
-        roundedRect(x + 18, y + 40, 12, 7, 3);
+        ctx.shadowColor = "transparent";
+        ctx.fillStyle = "#527faf";
+        ctx.beginPath();
+        ctx.moveTo(7, 20);
+        ctx.quadraticCurveTo(17, 16, 28, 20);
+        ctx.lineTo(25, 38);
+        ctx.lineTo(8, 38);
+        ctx.closePath();
         ctx.fill();
+        ctx.fillStyle = "#f4ca69";
+        ctx.fillRect(17, 20, 2, 18);
+        ctx.fillStyle = "#243c60";
+        ctx.beginPath();
+        ctx.moveTo(17, 27);
+        ctx.lineTo(25, 31);
+        ctx.lineTo(17, 34);
+        ctx.closePath();
+        ctx.fill();
+
+        // 顔と髪
+        ctx.fillStyle = "#f1c39a";
+        roundedRect(6, 5, 23, 18, 8);
+        ctx.fill();
+        ctx.fillStyle = "#17263f";
+        ctx.beginPath();
+        ctx.moveTo(5, 11);
+        ctx.quadraticCurveTo(7, 0, 17, 1);
+        ctx.quadraticCurveTo(26, -2, 31, 9);
+        ctx.lineTo(28, 14);
+        ctx.quadraticCurveTo(21, 7, 13, 10);
+        ctx.quadraticCurveTo(9, 13, 5, 15);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = "#263750";
+        ctx.beginPath();
+        ctx.moveTo(10, 2);
+        ctx.quadraticCurveTo(17, 7, 27, 4);
+        ctx.quadraticCurveTo(24, 0, 16, 0);
+        ctx.closePath();
+        ctx.fill();
+
+        // 強気な目・鼻・頬
+        ctx.fillStyle = "#dfe9f5";
+        ctx.beginPath();
+        ctx.moveTo(21, 12);
+        ctx.quadraticCurveTo(25, 11, 28, 14);
+        ctx.quadraticCurveTo(25, 17, 21, 16);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = "#17233a";
+        ctx.beginPath();
+        ctx.arc(25, 14, 1.7, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#9ed0ed";
+        ctx.beginPath();
+        ctx.arc(24.9, 13.8, .7, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#d89b82";
+        ctx.fillRect(28, 18, 3, 1);
+
+        // ヘッドギア
+        ctx.fillStyle = "#557eb1";
+        ctx.beginPath();
+        ctx.moveTo(5, 7);
+        ctx.quadraticCurveTo(13, 0, 26, 5);
+        ctx.lineTo(29, 9);
+        ctx.quadraticCurveTo(17, 4, 7, 10);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = "#8fb1da";
+        ctx.fillRect(11, 3, 11, 2);
+
+        // 動きのあるブーツ
+        ctx.fillStyle = "#202d45";
+        ctx.save();
+        ctx.translate(9, 41);
+        ctx.rotate((-running * .8) * Math.PI / 180);
+        roundedRect(-4, 0, 14, 7, 3);
+        ctx.fill();
+        ctx.restore();
+        ctx.save();
+        ctx.translate(25, 41);
+        ctx.rotate((running * .8) * Math.PI / 180);
+        roundedRect(-4, 0, 14, 7, 3);
+        ctx.fill();
+        ctx.restore();
+
+        ctx.restore();
     }
 
     function drawGoal() {
