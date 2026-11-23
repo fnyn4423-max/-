@@ -21,7 +21,7 @@
             <div class="game-heading">
                 <div>
                     <p class="eyebrow">SIDE-SCROLLING ADVENTURE</p>
-                    <h1>星をあつめて、ゴールへ。</h1>
+                    <h1>コインを集めて、ゴールへ。</h1>
                 </div>
                 <button class="restart-button" id="restart-button" type="button">
                     <span aria-hidden="true">↻</span> はじめから
@@ -33,7 +33,7 @@
                     このゲームを遊ぶには、Canvasに対応したブラウザーが必要です。
                 </canvas>
                 <div class="hud" aria-live="polite">
-                    <div class="hud-pill"><span class="hud-icon">✦</span><span id="score">0</span><span class="hud-label">/ 8</span></div>
+                    <div class="hud-pill"><span class="hud-icon coin-icon" aria-hidden="true">¥</span><span id="score">0</span><span class="hud-label">/ 8</span></div>
                     <div class="hud-pill hearts" id="hearts" aria-label="残りライフ">♥ ♥ ♥</div>
                     <div class="hud-pill progress-pill"><span id="progress">0</span><span class="hud-label">%</span></div>
                 </div>
@@ -42,7 +42,7 @@
                         <span class="message-sparkle" id="message-icon" aria-hidden="true">✦</span>
                         <p class="eyebrow" id="message-eyebrow">ADVENTURE COMPLETE</p>
                         <h2 id="message-title">やったね！</h2>
-                        <p id="message-copy">星を集めてゴールに到着！</p>
+                        <p id="message-copy">コインを集めてゴールに到着！</p>
                         <button class="play-button" id="play-button" type="button">もう一度あそぶ <span aria-hidden="true">→</span></button>
                     </div>
                 </div>
@@ -56,7 +56,7 @@
                     <span class="key-group"><kbd>Space</kbd></span>
                     <span>ジャンプ</span>
                 </div>
-                <p>星を集めながら、ゴールを目指そう <span aria-hidden="true">↗</span></p>
+                <p>コインを集めながら、ゴールを目指そう <span aria-hidden="true">↗</span></p>
             </footer>
         </section>
         <p class="mobile-hint">スマートフォンでは画面下のボタンで操作できます。</p>

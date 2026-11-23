@@ -38,7 +38,7 @@
         { x: 2850, y: 315, w: 175, h: 18 },
     ];
 
-    const starPositions = [
+    const coinPositions = [
         [267, 327], [492, 267], [838, 332], [1078, 277],
         [1418, 327], [1655, 262], [2013, 327], [2266, 272],
     ];
@@ -49,7 +49,7 @@
     ];
 
     let player;
-    let stars;
+    let coins;
     let enemies;
     let cameraX = 0;
     let score = 0;
@@ -60,7 +60,7 @@
 
     function resetGame() {
         player = { x: 70, y: 385, w: 34, h: 46, vx: 0, vy: 0, grounded: false, invulnerable: 0, facing: 1 };
-        stars = starPositions.map(([x, y]) => ({ x, y, collected: false }));
+        coins = coinPositions.map(([x, y]) => ({ x, y, collected: false }));
         enemies = enemyStarts.map((enemy) => ({ ...enemy, x: enemy.x, direction: 1, w: 34, h: 30 }));
         cameraX = 0;
         score = 0;
@@ -81,11 +81,11 @@
     function finish(won) {
         gameState = won ? "won" : "lost";
         message.hidden = false;
-        messageIcon.textContent = won ? "✦" : "♡";
+        messageIcon.textContent = won ? "¥" : "♡";
         messageEyebrow.textContent = won ? "ADVENTURE COMPLETE" : "TRY AGAIN";
         messageTitle.textContent = won ? "やったね！" : "もう少し！";
         messageCopy.textContent = won
-            ? `星を ${score} 個集めてゴールに到着！`
+            ? `コインを ${score} 枚集めてゴールに到着！`
             : "ライフがなくなっちゃった。もう一度挑戦しよう！";
         playButton.focus();
     }
@@ -147,9 +147,9 @@
             if (overlaps(player, { x: enemy.x, y: 435, w: enemy.w, h: enemy.h })) damagePlayer();
         }
 
-        for (const star of stars) {
-            if (!star.collected && overlaps(player, { x: star.x - 13, y: star.y - 13, w: 26, h: 26 })) {
-                star.collected = true;
+        for (const coin of coins) {
+            if (!coin.collected && overlaps(player, { x: coin.x - 13, y: coin.y - 13, w: 26, h: 26 })) {
+                coin.collected = true;
                 score += 1;
             }
         }
@@ -232,27 +232,31 @@
         }
     }
 
-    function drawStar(star) {
-        if (star.collected) return;
-        const x = star.x - cameraX;
-        const pulse = 1 + Math.sin(elapsed * 5 + star.x) * .08;
+    function drawCoin(coin) {
+        if (coin.collected) return;
+        const x = coin.x - cameraX;
+        const bob = Math.sin(elapsed * 3 + coin.x) * 4;
+        const width = .72 + Math.abs(Math.sin(elapsed * 4 + coin.x)) * .28;
         ctx.save();
-        ctx.translate(x, star.y + Math.sin(elapsed * 3 + star.x) * 4);
-        ctx.scale(pulse, pulse);
-        ctx.shadowColor = "#fff0a1";
-        ctx.shadowBlur = 17;
-        ctx.fillStyle = "#ffd369";
+        ctx.translate(x, coin.y + bob);
+        ctx.scale(width, 1);
+        ctx.shadowColor = "rgba(255, 195, 66, .7)";
+        ctx.shadowBlur = 14;
+        ctx.fillStyle = "#e89a2e";
         ctx.beginPath();
-        for (let i = 0; i < 10; i += 1) {
-            const angle = -Math.PI / 2 + i * Math.PI / 5;
-            const radius = i % 2 === 0 ? 13 : 6;
-            const px = Math.cos(angle) * radius;
-            const py = Math.sin(angle) * radius;
-            if (i === 0) ctx.moveTo(px, py);
-            else ctx.lineTo(px, py);
-        }
-        ctx.closePath();
+        ctx.arc(0, 0, 12, 0, Math.PI * 2);
         ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = "#fff0a1";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(0, 0, 9, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.fillStyle = "#fff0a1";
+        ctx.font = "bold 12px sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("¥", 0, 1);
         ctx.restore();
     }
 
@@ -439,7 +443,7 @@
     function render() {
         drawBackground();
         drawPlatforms();
-        for (const star of stars) drawStar(star);
+        for (const coin of coins) drawCoin(coin);
         for (const enemy of enemies) drawEnemy(enemy);
         drawGoal();
         drawPlayer();

@@ -114,6 +114,16 @@ canvas { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; }
 }
 
 .hud-icon { color: #ffd26b; font-size: 16px; }
+.coin-icon {
+    display: inline-grid;
+    width: 17px;
+    height: 17px;
+    place-items: center;
+    border: 2px solid currentColor;
+    border-radius: 50%;
+    font-size: 9px;
+    line-height: 1;
+}
 .hud-label { color: #aeb9d5; font-size: 11px; font-weight: 600; }
 .hearts { color: #ff8296; letter-spacing: 3px; }
 
